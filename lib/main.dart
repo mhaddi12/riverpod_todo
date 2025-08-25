@@ -5,7 +5,7 @@ import 'package:todo_simple/view_model/auth.dart';
 
 import 'firebase_options.dart';
 import 'views/auth.dart';
-import 'views/home.dart'; // you'll create this screen
+import 'views/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
