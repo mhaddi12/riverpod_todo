@@ -32,13 +32,6 @@ class HomeView extends ConsumerWidget {
             : Colors.teal,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: AppColors.textWhite),
-            tooltip: "Logout",
-            onPressed: () async {
-              await ref.read(authRepositoryProvider).signOut();
-            },
-          ),
-          IconButton(
             onPressed: () {
               Navigator.push(
                 context,
@@ -46,6 +39,13 @@ class HomeView extends ConsumerWidget {
               );
             },
             icon: const Icon(Icons.person, color: AppColors.textWhite),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: AppColors.textWhite),
+            tooltip: "Logout",
+            onPressed: () async {
+              await ref.read(authRepositoryProvider).signOut();
+            },
           ),
         ],
       ),
