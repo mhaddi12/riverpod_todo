@@ -136,9 +136,7 @@ class _AddEditTaskPageState extends ConsumerState<AddEditTaskPage> {
                       DateTime.now().millisecondsSinceEpoch.toString(),
                   title: _titleController.text.trim(),
                   description: _descController.text.trim(),
-                  assignedTo: widget.role == UserRole.manager
-                      ? (_assignedTo ?? "")
-                      : null,
+                  assignedTo: _assignedTo ?? null,
                   createdBy: widget.task?.createdBy ?? currentUser?.uid ?? "",
                   createdAt: widget.task?.createdAt ?? Timestamp.now(),
                   isCompleted: widget.task?.isCompleted ?? false,

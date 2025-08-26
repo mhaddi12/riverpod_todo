@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todo_simple/provider/employee_provider.dart';
 
 import '../model/role.dart';
 import '../utils/colors.dart';
 
-class EmployeeListView extends StatelessWidget {
+class EmployeeListView extends ConsumerWidget {
   final UserRole role;
   const EmployeeListView({super.key, required this.role});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final employeeProvider = ref.watch(employeeRepoProvider);
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(color: AppColors.textWhite),
@@ -21,16 +24,13 @@ class EmployeeListView extends StatelessWidget {
             ? Colors.blueAccent
             : Colors.teal,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("users")
-            .where("role", isEqualTo: "employee")
-            .snapshots(),
+      body: StreamBuilder<List<AppUser>>(
+        stream: employeeProvider.showEmployeeList(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final employees = snapshot.data!.docs;
+          final employees = snapshot.data!;
           if (employees.isEmpty) {
             return const Center(child: Text("No employees found"));
           }
@@ -59,7 +59,7 @@ class EmployeeListView extends StatelessWidget {
                     CircleAvatar(
                       backgroundColor: Colors.teal.shade200,
                       child: Text(
-                        (emp["name"] ?? "U")[0].toUpperCase(),
+                        (emp.name ?? "U")[0].toUpperCase(),
                         style: const TextStyle(color: AppColors.textWhite),
                       ),
                     ),
@@ -68,14 +68,14 @@ class EmployeeListView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          emp["name"] ?? "Unknown",
+                          emp.name ?? "Unknown",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
                         Text(
-                          emp["email"] ?? "",
+                          emp.email ?? "",
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ],

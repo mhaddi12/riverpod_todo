@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_simple/model/role.dart';
@@ -45,9 +46,16 @@ class HomeView extends ConsumerWidget {
             ),
           IconButton(
             icon: const Icon(Icons.logout, color: AppColors.textWhite),
-            tooltip: "Logout",
+            tooltip: "Log Out",
             onPressed: () async {
-              await ref.read(authRepositoryProvider).signOut();
+              bool? isConfirm = await showDialog(
+                context,
+                "LogOut?",
+                "Do you want to logout?",
+              );
+              if (isConfirm == true) {
+                await ref.read(authRepositoryProvider).signOut();
+              }
             },
           ),
         ],
@@ -187,7 +195,7 @@ class TaskCard extends ConsumerWidget {
             usersAsync.when(
               data: (usersMap) {
                 final assignedEmail = task.assignedTo != null
-                    ? usersMap[task.assignedTo] ?? "null"
+                    ? usersMap[task.assignedTo] ?? "Unassigned"
                     : "Unassigned";
 
                 final createdByEmail = usersMap[task.createdBy] ?? "Unknown";
@@ -237,8 +245,16 @@ class TaskCard extends ConsumerWidget {
                 if (role == UserRole.manager)
                   IconButton(
                     icon: const Icon(Icons.delete, color: AppColors.error),
-                    onPressed: () {
-                      ref.read(todoRepositoryProvider).deleteTask(task.id);
+                    onPressed: () async {
+                      final confirm = await showDialog(
+                        context,
+                        'Delete Task?',
+                        "Are you sure you want to delete this task?",
+                      );
+                      if (confirm == true) {
+                        ref.read(todoRepositoryProvider).deleteTask(task.id);
+                      }
+                      // ref.read(todoRepositoryProvider).deleteTask(task.id);
                     },
                   ),
               ],
@@ -248,4 +264,26 @@ class TaskCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<bool?> showDialog(BuildContext context, String? title, String content) {
+  return showCupertinoDialog<bool>(
+    context: context,
+    builder: (context) => CupertinoAlertDialog(
+      title: Text(title.toString()),
+      content: Text(content),
+      actions: [
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.of(context).pop(false), // Cancel
+          child: const Text("Cancel"),
+        ),
+        CupertinoDialogAction(
+          isDestructiveAction: true,
+          onPressed: () => Navigator.of(context).pop(true), // Yes
+          child: const Text("Yes"),
+        ),
+      ],
+    ),
+  );
 }

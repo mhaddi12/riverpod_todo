@@ -21,12 +21,22 @@ class AppUser {
   };
 
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
-    uid: json['uid'],
-    email: json['email'],
+    uid: json['uid'] ?? '',
+    email: json['email'] ?? '',
     role: UserRole.values.firstWhere(
       (e) => e.name == json['role'],
       orElse: () => UserRole.employee,
     ),
-    name: json['name'],
+    name: json['name'] ?? '',
   );
+
+  /// ✅ Handy copyWith
+  AppUser copyWith({String? uid, String? email, UserRole? role, String? name}) {
+    return AppUser(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      name: name ?? this.name,
+    );
+  }
 }

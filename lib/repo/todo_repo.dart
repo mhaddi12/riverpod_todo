@@ -40,7 +40,7 @@ class FirebaseTodoRepository implements ITodoRepository {
               .where(
                 Filter.or(
                   Filter("assignedTo", isEqualTo: currentUserId),
-                  Filter("assignedTo", isNull: true),
+                  Filter("createdBy", isEqualTo: currentUserId),
                 ),
               );
 
