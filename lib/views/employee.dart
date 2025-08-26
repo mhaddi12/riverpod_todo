@@ -12,7 +12,7 @@ class EmployeeListView extends StatelessWidget {
       appBar: AppBar(
         leading: BackButton(color: AppColors.textWhite),
         title: const Text(
-          "👥 Employees",
+          "Employees",
           style: TextStyle(color: AppColors.textWhite),
         ),
         backgroundColor: Colors.blueAccent,

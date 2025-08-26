@@ -5,23 +5,11 @@ import 'package:todo_simple/model/role.dart';
 import 'package:todo_simple/model/todo.dart';
 import 'package:todo_simple/repo/todo_repo.dart';
 import 'package:todo_simple/views/employee.dart';
-import '../provider/todo_provider.dart' show todoRepositoryProvider;
+import '../provider/todo_provider.dart'
+    show todoRepositoryProvider, usersProvider;
 import 'assigned.dart';
 import '../provider/auth_provider.dart' show authRepositoryProvider;
 import '../utils/colors.dart';
-
-/// 🔹 Provider to load all users at once
-final usersProvider = StreamProvider<Map<String, String>>((ref) {
-  return FirebaseFirestore.instance.collection("users").snapshots().map((
-    snapshot,
-  ) {
-    final map = <String, String>{};
-    for (var doc in snapshot.docs) {
-      map[doc.id] = (doc.data()["email"] ?? "Unknown") as String;
-    }
-    return map;
-  });
-});
 
 class HomeView extends ConsumerWidget {
   final UserRole role;
@@ -63,49 +51,51 @@ class HomeView extends ConsumerWidget {
       ),
 
       /// 🔹 StreamBuilder for tasks
-      body: StreamBuilder<List<Task>>(
-        stream: repo.fetchTasks(currentUid, role),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "⚠️ Error: ${snapshot.error}",
-                style: const TextStyle(color: AppColors.error),
-              ),
+      body: SafeArea(
+        child: StreamBuilder<List<Task>>(
+          stream: repo.fetchTasks(currentUid, role),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  "⚠️ Error: ${snapshot.error}",
+                  style: const TextStyle(color: AppColors.error),
+                ),
+              );
+            }
+
+            final tasks = snapshot.data ?? [];
+            if (tasks.isEmpty) {
+              return const Center(
+                child: Text(
+                  "✨ No tasks yet. Create one!",
+                  style: TextStyle(fontSize: 16, color: Colors.blueGrey),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                final task = tasks[index];
+
+                // 🔹 Employees only see their own
+                bool canSee =
+                    role == UserRole.manager ||
+                    task.createdBy == currentUid ||
+                    task.assignedTo == currentUid;
+
+                if (!canSee) return const SizedBox.shrink();
+
+                return TaskCard(task: task, role: role);
+              },
             );
-          }
-
-          final tasks = snapshot.data ?? [];
-          if (tasks.isEmpty) {
-            return const Center(
-              child: Text(
-                "✨ No tasks yet. Create one!",
-                style: TextStyle(fontSize: 16, color: Colors.blueGrey),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: tasks.length,
-            itemBuilder: (context, index) {
-              final task = tasks[index];
-
-              // 🔹 Employees only see their own
-              bool canSee =
-                  role == UserRole.manager ||
-                  task.createdBy == currentUid ||
-                  task.assignedTo == currentUid;
-
-              if (!canSee) return const SizedBox.shrink();
-
-              return TaskCard(task: task, role: role);
-            },
-          );
-        },
+          },
+        ),
       ),
 
       // ✅ FAB
