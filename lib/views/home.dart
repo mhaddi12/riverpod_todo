@@ -68,7 +68,15 @@ class HomeView extends ConsumerWidget {
             }
 
             final tasks = snapshot.data ?? [];
-            if (tasks.isEmpty) {
+
+            // ✅ Filter visible tasks (important!)
+            final visibleTasks = tasks.where((task) {
+              return role == UserRole.manager ||
+                  task.createdBy == currentUid ||
+                  task.assignedTo == currentUid;
+            }).toList();
+
+            if (visibleTasks.isEmpty) {
               return const Center(
                 child: Text(
                   "✨ No tasks yet. Create one!",
@@ -79,18 +87,9 @@ class HomeView extends ConsumerWidget {
 
             return ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: tasks.length,
+              itemCount: visibleTasks.length,
               itemBuilder: (context, index) {
-                final task = tasks[index];
-
-                // 🔹 Employees only see their own
-                bool canSee =
-                    role == UserRole.manager ||
-                    task.createdBy == currentUid ||
-                    task.assignedTo == currentUid;
-
-                if (!canSee) return const SizedBox.shrink();
-
+                final task = visibleTasks[index];
                 return TaskCard(task: task, role: role);
               },
             );
