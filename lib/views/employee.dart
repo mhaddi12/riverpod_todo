@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../model/role.dart';
 import '../utils/colors.dart';
 
 class EmployeeListView extends StatelessWidget {
-  const EmployeeListView({super.key});
+  final UserRole role;
+  const EmployeeListView({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +17,9 @@ class EmployeeListView extends StatelessWidget {
           "Employees",
           style: TextStyle(color: AppColors.textWhite),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: role == UserRole.manager
+            ? Colors.blueAccent
+            : Colors.teal,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance

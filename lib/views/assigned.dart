@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../model/role.dart';
 import '../model/todo.dart';
 import '../provider/auth_provider.dart';
+import '../utils/colors.dart' show AppColors, textWhite;
 import '../view_model/todo.dart';
 
 class AddEditTaskPage extends ConsumerStatefulWidget {
@@ -38,8 +39,14 @@ class _AddEditTaskPageState extends ConsumerState<AddEditTaskPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.task == null ? "Add Task" : "Edit Task"),
-        backgroundColor: Colors.blueAccent,
+        leading: BackButton(color: AppColors.textWhite),
+        title: Text(
+          widget.task == null ? "Add Task" : "Edit Task",
+          style: TextStyle(color: AppColors.textWhite),
+        ),
+        backgroundColor: widget.role == UserRole.manager
+            ? Colors.blueAccent
+            : Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -113,7 +120,9 @@ class _AddEditTaskPageState extends ConsumerState<AddEditTaskPage> {
           padding: const EdgeInsets.all(16),
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: widget.role == UserRole.manager
+                  ? Colors.blueAccent
+                  : Colors.teal,
               minimumSize: const Size(double.infinity, 50),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -145,7 +154,10 @@ class _AddEditTaskPageState extends ConsumerState<AddEditTaskPage> {
               }
             },
             icon: const Icon(Icons.save, color: Colors.white),
-            label: Text(widget.task == null ? "Add Task" : "Update Task"),
+            label: Text(
+              widget.task == null ? "Add Task" : "Update Task",
+              style: TextStyle(color: AppColors.textWhite),
+            ),
           ),
         ),
       ),

@@ -31,15 +31,18 @@ class HomeView extends ConsumerWidget {
             ? Colors.blueAccent
             : Colors.teal,
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const EmployeeListView()),
-              );
-            },
-            icon: const Icon(Icons.person, color: AppColors.textWhite),
-          ),
+          if (role == UserRole.manager)
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EmployeeListView(role: role),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.person, color: AppColors.textWhite),
+            ),
           IconButton(
             icon: const Icon(Icons.logout, color: AppColors.textWhite),
             tooltip: "Logout",
@@ -99,7 +102,9 @@ class HomeView extends ConsumerWidget {
 
       // ✅ FAB
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: role == UserRole.manager
+            ? Colors.blueAccent
+            : Colors.teal,
         onPressed: () {
           Navigator.push(
             context,
