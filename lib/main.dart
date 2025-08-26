@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:todo_simple/view_model/auth.dart';
 
 import 'firebase_options.dart';
+import 'provider/auth_provider.dart' show authStateProvider;
 import 'views/auth.dart';
 import 'views/home.dart';
 
