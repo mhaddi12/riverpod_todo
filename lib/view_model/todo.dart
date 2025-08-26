@@ -2,15 +2,11 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_simple/model/todo.dart';
+import 'package:todo_simple/provider/auth_provider.dart';
+import 'package:todo_simple/provider/todo_provider.dart';
 import 'package:todo_simple/repo/todo_repo.dart';
 import '../model/role.dart';
 import 'auth.dart'; // <-- for authStateProvider
-
-final firestoreProvider = Provider((ref) => FirebaseFirestore.instance);
-
-final todoRepositoryProvider = Provider<ITodoRepository>((ref) {
-  return FirebaseTodoRepository(ref.watch(firestoreProvider));
-});
 
 class TodoNotifier extends StateNotifier<AsyncValue<List<Task>>> {
   final ITodoRepository repository;
@@ -55,10 +51,9 @@ class TodoNotifier extends StateNotifier<AsyncValue<List<Task>>> {
   }
 }
 
-/// Dynamically provides tasks for the logged-in user
 final todoProvider =
     StateNotifierProvider<TodoNotifier, AsyncValue<List<Task>>>((ref) {
-      final authState = ref.watch(authStateProvider).value; // current AppUser?
+      final authState = ref.watch(authStateProvider).value;
 
       if (authState == null) {
         // user not logged in

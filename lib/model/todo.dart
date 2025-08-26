@@ -4,10 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Task {
   final String id;
   final String title;
-  final String assignedTo; // uid of employee
-  final String createdBy; // uid of manager
+  final String? assignedTo; // uid of employee
+  final String? createdBy; // uid of manager
   final bool isCompleted;
   final String? description; // optional description
+  final Timestamp? createdAt;
 
   Task({
     required this.id,
@@ -16,16 +17,18 @@ class Task {
     required this.createdBy,
     this.isCompleted = false,
     this.description,
+    this.createdAt,
   });
 
   factory Task.fromJson(Map<String, dynamic> json, String id) {
     return Task(
       id: id,
       title: json['title'] ?? '',
-      assignedTo: json['assignedTo'] ?? '',
-      createdBy: json['createdBy'] ?? '',
+      assignedTo: json['assignedTo'] ?? null,
+      createdBy: json['createdBy'] ?? null,
       isCompleted: json['isCompleted'] ?? false,
       description: json['description'],
+      createdAt: json['createdAt'],
     );
   }
 
@@ -36,6 +39,7 @@ class Task {
       'createdBy': createdBy,
       'isCompleted': isCompleted,
       'description': description,
+      "createdAt": createdAt,
     };
   }
 
@@ -49,6 +53,7 @@ class Task {
     String? createdBy,
     bool? isCompleted,
     String? description,
+    Timestamp? createdAt,
   }) {
     return Task(
       id: id ?? this.id,
@@ -57,6 +62,7 @@ class Task {
       createdBy: createdBy ?? this.createdBy,
       isCompleted: isCompleted ?? this.isCompleted,
       description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

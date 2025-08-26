@@ -4,9 +4,15 @@ import 'package:todo_simple/model/role.dart';
 
 abstract class IAuthRepository {
   User? get currentUser;
+  bool get isLoading;
   Stream<AppUser?> authStateChanges();
   Future<AppUser?> signIn(String email, String password);
-  Future<AppUser?> signUp(String email, String password, UserRole role);
+  Future<AppUser?> signUp(
+    String email,
+    String password,
+    String name,
+    UserRole role,
+  );
   Future<void> signOut();
 }
 
@@ -16,6 +22,11 @@ class FirebaseAuthRepository implements IAuthRepository {
 
   FirebaseAuthRepository(this.auth, this.firestore);
 
+  bool _isLoading = false;
+
+  @override
+  bool get isLoading => _isLoading;
+
   @override
   User? get currentUser => auth.currentUser;
 
@@ -23,14 +34,17 @@ class FirebaseAuthRepository implements IAuthRepository {
   Stream<AppUser?> authStateChanges() {
     return auth.authStateChanges().asyncMap((user) async {
       if (user == null) return null;
+
       final doc = await firestore.collection("users").doc(user.uid).get();
       if (!doc.exists || doc.data() == null) return null;
+
       return AppUser.fromJson(doc.data()!);
     });
   }
 
   @override
   Future<AppUser?> signIn(String email, String password) async {
+    _isLoading = true;
     try {
       final credential = await auth.signInWithEmailAndPassword(
         email: email,
@@ -49,31 +63,47 @@ class FirebaseAuthRepository implements IAuthRepository {
       return AppUser.fromJson(doc.data()!);
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapFirebaseAuthError(e));
+    } finally {
+      _isLoading = false;
     }
   }
 
   @override
-  Future<AppUser?> signUp(String email, String password, UserRole role) async {
+  Future<AppUser?> signUp(
+    String email,
+    String password,
+    String name,
+    UserRole role,
+  ) async {
+    _isLoading = true;
     try {
       final credential = await auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      final user = AppUser(uid: credential.user!.uid, email: email, role: role);
+      final user = AppUser(
+        uid: credential.user!.uid,
+        email: email,
+        name: name,
+        role: role,
+      );
 
       await firestore.collection("users").doc(user.uid).set(user.toJson());
       return user;
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapFirebaseAuthError(e));
+    } finally {
+      _isLoading = false;
     }
   }
 
   @override
   Future<void> signOut() => auth.signOut();
+
   String _mapFirebaseAuthError(FirebaseAuthException e) {
     switch (e.code) {
-      case 'This email-already-in-use':
+      case 'email-already-in-use':
         return 'This email is already registered. Please log in instead.';
       case 'user-not-found':
         return 'No account found with this email.';

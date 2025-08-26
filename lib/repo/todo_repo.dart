@@ -16,7 +16,7 @@ class FirebaseTodoRepository implements ITodoRepository {
 
   @override
   Future<void> createTask(Task todo) async {
-    final docRef = firestore.collection('todos').doc(); // auto-generate ID
+    final docRef = firestore.collection('todos').doc();
     await docRef.set(todo.copyWith(id: docRef.id).toJson());
   }
 
@@ -33,10 +33,16 @@ class FirebaseTodoRepository implements ITodoRepository {
   @override
   Stream<List<Task>> fetchTasks(String currentUserId, UserRole role) {
     final query = role == UserRole.manager
-        ? firestore.collection('todos')
+        ? firestore.collection('todos').orderBy("createdAt", descending: true)
         : firestore
               .collection('todos')
-              .where('assignedTo', isEqualTo: currentUserId);
+              .orderBy("createdAt", descending: true)
+              .where(
+                Filter.or(
+                  Filter("assignedTo", isEqualTo: currentUserId),
+                  Filter("assignedTo", isNull: true),
+                ),
+              );
 
     return query.snapshots().map(
       (snapshot) => snapshot.docs.map((doc) => Task.fromDoc(doc)).toList(),
